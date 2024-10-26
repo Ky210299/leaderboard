@@ -1,19 +1,34 @@
-import {createClient} from "redis"
+import { createClient } from "redis";
 
 const client = createClient({
 	url: process.env.REDIS_URL,
 });
-client.on("error", (err) => console.log("REDIS ERROR\n\t", err));
 
-export class RedisRepository {
+class RedisRepository {
 	constructor() {
-		this.connect();
+		client.on("error", (err) => console.log("REDIS ERROR\n\t", err));
 	}
-	private async connect() {
+
+	public async set(key: any, value: any) {
 		try {
 			await client.connect();
+			return await client.set(JSON.stringify(key), JSON.stringify(value));
 		} catch (err) {
-			console.log(err);
+			throw err;
+		} finally {
+			await client.disconnect();
+		}
+	}
+	public async get(key: any) {
+		try {
+			await client.connect();
+			return await client.get(JSON.stringify(key));
+		} catch (err) {
+			throw err;
+		} finally {
+			await client.disconnect();
 		}
 	}
 }
+
+export const redis = new RedisRepository();
