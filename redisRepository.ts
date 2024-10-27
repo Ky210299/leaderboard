@@ -4,9 +4,19 @@ const client = createClient({
 	url: process.env.REDIS_URL,
 });
 
-class RedisRepository {
+export default class RedisRepository {
 	constructor() {
 		client.on("error", (err) => console.log("REDIS ERROR\n\t", err));
+		(async () => {
+			try {
+				client.connect();
+				console.log("redis connected");
+			} catch (err) {
+				throw err;
+			} finally {
+				client.disconnect();
+			}
+		})();
 	}
 
 	public async set(key: any, value: any) {
@@ -30,5 +40,3 @@ class RedisRepository {
 		}
 	}
 }
-
-export const redis = new RedisRepository();

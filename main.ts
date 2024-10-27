@@ -1,7 +1,6 @@
 process.loadEnvFile();
-import { redis } from "./redisRepository";
+import MongoRepository from "./mongoRepository";
+import RedisRepository from "./redisRepository";
 
-(async () => {
-	try {
-	} catch (err) {}
-})();
+const mongo = new MongoRepository();
+const redis = new RedisRepository();
