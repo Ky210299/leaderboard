@@ -1,15 +1,12 @@
 import { MongoClient } from "mongodb";
 
-const { MONGO_HOST } = process.env;
-const { MONGO_DB } = process.env;
-const { MONGO_USER } = process.env;
-const { MONGO_PASSWORD } = process.env;
-const { MONGO_PORT } = process.env;
+const { MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DB } = process.env;
 
-if (!MONGO_HOST || !MONGO_DB || !MONGO_USER || !MONGO_PASSWORD || !MONGO_PORT)
+if (!MONGO_USER || !MONGO_PASSWORD || !MONGO_HOST || !MONGO_DB) {
 	throw new Error("Bad Credentials");
+}
 
-const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`;
+const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT || 27017}/${MONGO_DB}`;
 
 const MONGO_COLLECTIONS = {
 	SCORES: "scores",

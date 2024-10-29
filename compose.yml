@@ -2,11 +2,27 @@ services:
   app:
     build: .
     env_file: .env
+    environment:
+      - NODE_ENVIRONMENT=${NODE_ENVIRONMENT}
+      - MONGO_HOST=mongodb
+      - REDIS_HOST=redis
+      - PORT=${PORT}
     depends_on:
       - mongodb
       - redis
     networks:
       - ranking-network
+    volumes:
+      - ./dist/:/app/dist/
+    develop:
+      watch:
+        - action: sync
+          path: ./dist/
+          target: /app/dist/
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
 
   redis:
     image: redis/redis-stack:latest

@@ -1,7 +1,11 @@
 import { createClient } from "redis";
 
+const { REDIS_HOST, REDIS_PORT } = process.env;
+
+if (!REDIS_HOST || !REDIS_PORT) throw new Error("Bad Redis configuration");
+
 const client = createClient({
-	url: process.env.REDIS_URL,
+	url: `redis://${REDIS_HOST}:${REDIS_PORT}`,
 });
 
 export default class RedisRepository {
