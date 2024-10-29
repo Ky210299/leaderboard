@@ -6,7 +6,7 @@ if (!MONGO_USER || !MONGO_PASSWORD || !MONGO_HOST || !MONGO_DB) {
 	throw new Error("Bad Credentials");
 }
 
-const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT || 27017}/${MONGO_DB}`;
+const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT || 27017}`;
 
 const MONGO_COLLECTIONS = {
 	SCORES: "scores",
@@ -18,83 +18,95 @@ const MONGO_COLLECTIONS = {
 type Score = {
 	playerId: string;
 	score: number;
-	game: Game;
-	lastUpdate: Date;
-	rank: number;
+	gameId: Game["id"];
 };
 type Player = { id: string; nickname: string };
-type Game = { title: string; plataform?: string };
+type Game = { id: string; title: string; plataform?: string };
 
-export default class MongoRepository {
+export class MongoRepository {
 	private readonly mongo;
 
 	constructor() {
 		this.mongo = new MongoClient(mongo_url);
-
 		(async () => {
 			try {
 				await this.init();
 			} catch (err) {
-				throw err;
+				console.log("error instantiating mongo ", err);
 			}
 		})();
 	}
 	private async init() {
 		await this.mongo.connect();
-		const existingCollections = await this.mongo.db().collections();
-		const collectionsNames = existingCollections.map((collection) => collection.collectionName);
-
-		if (!collectionsNames.includes(MONGO_COLLECTIONS.PLAYERS)) {
-			await this.mongo.db().createCollection(MONGO_COLLECTIONS.PLAYERS);
-		} else if (!collectionsNames.includes(MONGO_COLLECTIONS.GAMES)) {
-			await this.mongo.db().createCollection(MONGO_COLLECTIONS.GAMES);
-		} else if (!collectionsNames.includes(MONGO_COLLECTIONS.SCORES)) {
-			const scoreCollection = await this.mongo.db().createCollection(MONGO_COLLECTIONS.SCORES);
-			await this.mongo.db().createIndex(scoreCollection.collectionName, { score: -1 });
-		} else if (!collectionsNames.includes(MONGO_COLLECTIONS.LEADERBOARD)) {
-			const baseCollection = MONGO_COLLECTIONS.PLAYERS;
-
-			const pipeline = [
-				{
-					$lookup: {
-						from: MONGO_COLLECTIONS.SCORES,
-						localField: "id",
-						foreingField: "playerId",
-						as: "scoreData",
-					},
-				},
-				{
-					$unwind: "$scoreData",
-				},
-				{
-					$setWindowFields: {
-						sortBy: { "scoreData.score": -1 },
-						output: { rank: { $rank: {} } },
-					},
-				},
-				{
-					$project: {
-						"scoreData.id": true,
-						"scoreData.rank": true,
-						"scoreData.nickname": true,
-						"scoreData.score": true,
-						"scoreData.game.title": true,
-						"scoreData.lastUpdate": true,
-					},
-				},
-			];
-		}
+		const dbStats = await this.mongo.db(MONGO_DB).stats();
+		console.log("stats: ", dbStats);
 	}
 
 	public async addGame(game: Game) {
-		return await this.mongo.db().collection(MONGO_COLLECTIONS.GAMES).insertOne(game);
+		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.GAMES).insertOne(game);
 	}
 	public async saveScore(score: Score) {
-		return await this.mongo.db().collection(MONGO_COLLECTIONS.SCORES).insertOne(score);
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.SCORES)
+			.insertOne({ ...score, lastUpdate: new Date() });
 	}
 
-	public async saveUser(player: Player) {
-		return await this.mongo.db().collection(MONGO_COLLECTIONS.PLAYERS).insertOne(player);
+	public async savePlayer(player: Player) {
+		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS).insertOne(player);
 	}
-	public async getLeaderboard(game: Game) {}
+
+	public async getLeaderboard(gameId: Game["id"]) {
+		const result = this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.SCORES)
+			.aggregate([
+				{
+					$match: {
+						gameId: gameId,
+					},
+				},
+				{
+					$setWindowFields: {
+						sortBy: {
+							score: -1,
+						},
+						output: {
+							rank: { $rank: {} },
+						},
+					},
+				},
+				{
+					$lookup: {
+						from: MONGO_COLLECTIONS.PLAYERS,
+						localField: "playerId",
+						foreignField: "id",
+						as: "player",
+					},
+				},
+				{
+					$lookup: {
+						from: MONGO_COLLECTIONS.GAMES,
+						localField: "gameId",
+						foreignField: "id",
+						as: "game",
+					},
+				},
+				{ $unwind: "$player" },
+				{ $unwind: "$game" },
+				{
+					$project: {
+						_id: 0,
+						rank: 1,
+						"player.nickname": 1,
+						score: 1,
+						"game.title": 1,
+					},
+				},
+			])
+			.toArray();
+		return result;
+	}
 }
+
+export const mongo = new MongoRepository();
