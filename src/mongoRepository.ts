@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 
 const { MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DB } = process.env;
 
@@ -16,12 +16,13 @@ const MONGO_COLLECTIONS = {
 };
 
 type Score = {
-	playerId: string;
+	id: ObjectId;
+	playerId: Player["id"];
 	score: number;
 	gameId: Game["id"];
 };
-type Player = { id: string; nickname: string };
-type Game = { id: string; title: string; plataform?: string };
+type Player = { id: ObjectId; nickname: string };
+type Game = { id: ObjectId; title: string; plataform?: string };
 
 export class MongoRepository {
 	private readonly mongo;
@@ -31,28 +32,75 @@ export class MongoRepository {
 		(async () => {
 			try {
 				await this.init();
+				console.log("Connected to MongoDB");
 			} catch (err) {
-				console.log("error instantiating mongo ", err);
+				console.log("", err);
 			}
 		})();
 	}
+
 	private async init() {
 		await this.mongo.connect();
 		const dbStats = await this.mongo.db(MONGO_DB).stats();
-		console.log("stats: ", dbStats);
+		console.log("\tMongo db statistics:\n\t", dbStats);
 	}
 
-	public async addGame(game: Game) {
+	public async existGame(gameId: Game["id"]) {
+		if (!gameId) throw new Error("Undefined id");
+		const game = await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.GAMES)
+			.findOne({ _id: gameId });
+		return game !== null;
+	}
+	public async existPlayer(playerId: Player["id"]) {
+		const player = await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.PLAYERS)
+			.findOne({ _id: playerId });
+		return player !== null;
+	}
+	public async existScore(scoreId: Score["id"]) {
+		const score = await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.SCORES)
+			.findOne({ _id: scoreId });
+		return score !== null;
+	}
+
+	public async updateGame(gameId: Game["id"], newGameData: Partial<Game>) {
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.GAMES)
+			.updateOne({ _id: gameId }, { newGameData });
+	}
+
+	public async updatePlayer(playerId: Player["id"], newPlayerData: Partial<Player>) {
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.PLAYERS)
+			.updateOne({ id: playerId }, { newPlayerData });
+	}
+
+	public async updateScore(scoreId: Score["id"], newScoreData: Partial<Score>) {
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.SCORES)
+			.updateOne({ id: scoreId }, { newScoreData });
+	}
+
+	public async addGame(game: Omit<Game, "id">) {
 		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.GAMES).insertOne(game);
 	}
-	public async saveScore(score: Score) {
+
+	public async saveScore(score: Omit<Score, "id">) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
 			.insertOne({ ...score, lastUpdate: new Date() });
 	}
 
-	public async savePlayer(player: Player) {
+	public async savePlayer(player: Omit<Player, "id">) {
 		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS).insertOne(player);
 	}
 
