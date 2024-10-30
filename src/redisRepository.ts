@@ -8,7 +8,7 @@ const client = createClient({
 	url: `redis://${REDIS_HOST}:${REDIS_PORT}`,
 });
 
-class RedisRepository {
+export default class RedisRepository {
 	constructor() {
 		client.on("error", (err) => console.log("REDIS ERROR\n\t", err));
 		(async () => {

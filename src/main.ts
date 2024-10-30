@@ -1,11 +1,5 @@
-import { mongo } from "./mongoRepository";
-import { redis } from "./redisRepository";
+import MongoRepository from "./mongoRepository";
+import RedisRepository from "./redisRepository";
 
-(async () => {
-	try {
-		const exist = await mongo.existGame("2");
-		console.log(exist);
-	} catch (err) {
-		console.log("ERROR: ", err);
-	}
-})();
+const mongo = new MongoRepository();
+

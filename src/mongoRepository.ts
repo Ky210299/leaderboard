@@ -6,7 +6,7 @@ if (!MONGO_USER || !MONGO_PASSWORD || !MONGO_HOST || !MONGO_DB) {
 	throw new Error("Bad Credentials");
 }
 
-const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT || 27017}`;
+export const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT || 27017}`;
 
 const MONGO_COLLECTIONS = {
 	SCORES: "scores",
@@ -24,7 +24,7 @@ type Score = {
 type Player = { id: ObjectId; nickname: string };
 type Game = { id: ObjectId; title: string; plataform?: string };
 
-export class MongoRepository {
+export default class MongoRepository {
 	private readonly mongo;
 
 	constructor() {
