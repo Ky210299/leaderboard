@@ -98,14 +98,19 @@ export default class MongoRepository {
 	}
 
 	public async saveScore(score: Omit<Score, "id">) {
-		return await this.mongo
+		const newScore = await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
 			.insertOne({ ...score, lastUpdate: new Date() });
+		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.SCORES).findOne(newScore);
 	}
 
 	public async savePlayer(player: Omit<Player, "id">) {
-		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS).insertOne(player);
+		const newPlayer = await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.PLAYERS)
+			.insertOne(player);
+		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS).findOne(newPlayer);
 	}
 
 	public async getPlayer(playerId: Player["id"]) {
