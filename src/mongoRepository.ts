@@ -72,21 +72,25 @@ export default class MongoRepository {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.GAMES)
-			.findOneAndUpdate({ _id: gameId }, { newGameData }, { returnDocument: "after" });
+			.findOneAndUpdate({ _id: gameId }, { $set: newGameData }, { returnDocument: "after" });
 	}
 
 	public async updatePlayer(playerId: Player["id"], newPlayerData: Partial<Player>) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.PLAYERS)
-			.findOneAndUpdate({ id: playerId }, { newPlayerData }, { returnDocument: "after" });
+			.findOneAndUpdate({ id: playerId }, { $set: newPlayerData }, { returnDocument: "after" });
 	}
 
 	public async updateScore(playerId: Player["id"], gameId: Game["id"], newScore: Score["score"]) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
-			.findOneAndUpdate({ playerId, gameId }, { score: newScore }, { returnDocument: "after" });
+			.findOneAndUpdate(
+				{ playerId, gameId },
+				{ $set: { score: newScore } },
+				{ returnDocument: "after" },
+			);
 	}
 
 	public async addGame(game: Omit<Game, "id">) {
