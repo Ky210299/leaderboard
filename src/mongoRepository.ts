@@ -50,14 +50,14 @@ export default class MongoRepository {
 		const game = await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.GAMES)
-			.findOne({ _id: gameId });
+			.findOne({ _id: new ObjectId(gameId) });
 		return game !== null;
 	}
 	public async existPlayer(playerId: Player["id"]) {
 		const player = await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.PLAYERS)
-			.findOne({ _id: playerId });
+			.findOne({ _id: new ObjectId(playerId) });
 		return player !== null;
 	}
 	public async existScore(playerId: Player["id"], gameId: Game["id"]) {
@@ -72,7 +72,7 @@ export default class MongoRepository {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.GAMES)
-			.findOneAndUpdate({ _id: gameId }, { $set: newGameData }, { returnDocument: "after" });
+			.findOneAndUpdate({ _id: new ObjectId(gameId) }, { $set: newGameData }, { returnDocument: "after" });
 	}
 
 	public async updatePlayer(playerId: Player["id"], newPlayerData: Partial<Player>) {
@@ -121,19 +121,19 @@ export default class MongoRepository {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.PLAYERS)
-			.findOne({ _id: playerId });
+			.findOne({ _id: new ObjectId(playerId) });
 	}
 	public async getGame(gameId: Game["id"]) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.GAMES)
-			.findOne({ _id: gameId });
+			.findOne({ _id: new ObjectId(gameId) });
 	}
 	public async getScore(playerId: Player["id"], gameId: Game["id"]) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
-			.findOne({ playerId, gameId });
+			.findOne({ playerId: new ObjectId(playerId), gameId: new ObjectId(gameId) });
 	}
 
 	public async getLeaderboardByGame(gameId: Game["id"]) {
@@ -143,7 +143,7 @@ export default class MongoRepository {
 			.aggregate([
 				{
 					$match: {
-						gameId: gameId,
+						gameId: new ObjectId(gameId),
 					},
 				},
 				{
