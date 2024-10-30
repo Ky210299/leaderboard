@@ -15,14 +15,14 @@ const MONGO_COLLECTIONS = {
 	LEADERBOARD: "leaderboard",
 };
 
-type Score = {
+export type Score = {
 	id: ObjectId;
 	playerId: Player["id"];
 	score: number;
 	gameId: Game["id"];
 };
-type Player = { id: ObjectId; nickname: string };
-type Game = { id: ObjectId; title: string; plataform?: string };
+export type Player = { id: ObjectId; nickname: string };
+export type Game = { id: ObjectId; title: string; plataform?: string };
 
 export default class MongoRepository {
 	private readonly mongo;
@@ -60,11 +60,11 @@ export default class MongoRepository {
 			.findOne({ _id: playerId });
 		return player !== null;
 	}
-	public async existScore(scoreId: Score["id"]) {
+	public async existScore(playerId: Player["id"], gameId: Game["id"]) {
 		const score = await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
-			.findOne({ _id: scoreId });
+			.findOne({ playerId, gameId });
 		return score !== null;
 	}
 
@@ -72,21 +72,21 @@ export default class MongoRepository {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.GAMES)
-			.updateOne({ _id: gameId }, { newGameData });
+			.findOneAndUpdate({ _id: gameId }, { newGameData }, { returnDocument: "after" });
 	}
 
 	public async updatePlayer(playerId: Player["id"], newPlayerData: Partial<Player>) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.PLAYERS)
-			.updateOne({ id: playerId }, { newPlayerData });
+			.findOneAndUpdate({ id: playerId }, { newPlayerData }, { returnDocument: "after" });
 	}
 
-	public async updateScore(scoreId: Score["id"], newScoreData: Partial<Score>) {
+	public async updateScore(playerId: Player["id"], gameId: Game["id"], newScore: Score["score"]) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
-			.updateOne({ id: scoreId }, { newScoreData });
+			.findOneAndUpdate({ playerId, gameId }, { score: newScore }, { returnDocument: "after" });
 	}
 
 	public async addGame(game: Omit<Game, "id">) {
@@ -116,11 +116,11 @@ export default class MongoRepository {
 			.collection(MONGO_COLLECTIONS.GAMES)
 			.findOne({ _id: gameId });
 	}
-	public async getScore(scoreId: Score["id"]) {
+	public async getScore(playerId: Player["id"], gameId: Game["id"]) {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
-			.findOne({ _id: scoreId });
+			.findOne({ playerId, gameId });
 	}
 
 	public async getLeaderboardByGame(gameId: Game["id"]) {
