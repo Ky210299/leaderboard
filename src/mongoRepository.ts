@@ -34,7 +34,7 @@ export default class MongoRepository {
 				await this.init();
 				console.log("Connected to MongoDB");
 			} catch (err) {
-				console.log("", err);
+				console.log("\tMongoDb error\n\t", err);
 			}
 		})();
 	}
@@ -163,7 +163,7 @@ export default class MongoRepository {
 				{ $unwind: "$game" },
 				{
 					$project: {
-						_id: 0,
+						_id: 1,
 						rank: 1,
 						"player.nickname": 1,
 						score: 1,
