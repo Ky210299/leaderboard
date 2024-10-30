@@ -72,7 +72,11 @@ export default class MongoRepository {
 		return await this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.GAMES)
-			.findOneAndUpdate({ _id: new ObjectId(gameId) }, { $set: newGameData }, { returnDocument: "after" });
+			.findOneAndUpdate(
+				{ _id: new ObjectId(gameId) },
+				{ $set: newGameData },
+				{ returnDocument: "after" },
+			);
 	}
 
 	public async updatePlayer(playerId: Player["id"], newPlayerData: Partial<Player>) {
@@ -98,7 +102,10 @@ export default class MongoRepository {
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.GAMES)
 			.insertOne(game);
-		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.GAMES).findOne(newGame);
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.GAMES)
+			.findOne({ _id: newGame.insertedId });
 	}
 
 	public async saveScore(score: Omit<Score, "id">) {
@@ -106,7 +113,10 @@ export default class MongoRepository {
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
 			.insertOne({ ...score, lastUpdate: new Date() });
-		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.SCORES).findOne(newScore);
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.SCORES)
+			.findOne({ _id: newScore.insertedId });
 	}
 
 	public async savePlayer(player: Omit<Player, "id">) {
@@ -114,7 +124,10 @@ export default class MongoRepository {
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.PLAYERS)
 			.insertOne(player);
-		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS).findOne(newPlayer);
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.PLAYERS)
+			.findOne({ _id: newPlayer.insertedId });
 	}
 
 	public async getPlayer(playerId: Player["id"]) {
