@@ -104,7 +104,26 @@ export class MongoRepository {
 		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS).insertOne(player);
 	}
 
-	public async getLeaderboard(gameId: Game["id"]) {
+	public async getPlayer(playerId: Player["id"]) {
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.PLAYERS)
+			.findOne({ _id: playerId });
+	}
+	public async getGame(gameId: Game["id"]) {
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.GAMES)
+			.findOne({ _id: gameId });
+	}
+	public async getScore(scoreId: Score["id"]) {
+		return await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.SCORES)
+			.findOne({ _id: scoreId });
+	}
+
+	public async getLeaderboardByGame(gameId: Game["id"]) {
 		const result = this.mongo
 			.db(MONGO_DB)
 			.collection(MONGO_COLLECTIONS.SCORES)
