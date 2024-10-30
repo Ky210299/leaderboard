@@ -90,7 +90,11 @@ export default class MongoRepository {
 	}
 
 	public async addGame(game: Omit<Game, "id">) {
-		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.GAMES).insertOne(game);
+		const newGame = await this.mongo
+			.db(MONGO_DB)
+			.collection(MONGO_COLLECTIONS.GAMES)
+			.insertOne(game);
+		return await this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.GAMES).findOne(newGame);
 	}
 
 	public async saveScore(score: Omit<Score, "id">) {
