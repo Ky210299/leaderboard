@@ -1,10 +1,12 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { Repository } from "../../../domain";
+import { Game, Player, Score } from "../../../domain/DTOs";
+import { UPDATE_SCORE_OPTIONS_TYPES, UpdateScoreOptions } from "../../../domain/ports/repository";
 
 const { MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DB } = process.env;
 
 if (!MONGO_USER || !MONGO_PASSWORD || !MONGO_HOST || !MONGO_DB) {
-	throw new Error("Bad Credentials");
+	throw new Error("Bad MongoDB Credentials");
 }
 
 export const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT || 27017}`;
@@ -16,14 +18,14 @@ const MONGO_COLLECTIONS = {
 	LEADERBOARD: "leaderboard",
 };
 
-export type Score = {
+type MongoScore = {
 	id: ObjectId;
-	playerId: Player["id"];
+	playerId: MongoPlayer["id"];
 	score: number;
-	gameId: Game["id"];
+	gameId: MongoGame["id"];
 };
-export type Player = { id: ObjectId; nickname: string };
-export type Game = { id: ObjectId; title: string; plataform?: string };
+type MongoPlayer = { id: ObjectId; nickname: string };
+type MongoGame = { id: ObjectId; title: string; plataform?: string };
 
 export default class MongoRepository implements Repository {
 	private readonly mongo;
@@ -82,26 +84,63 @@ export default class MongoRepository implements Repository {
 			.findOneAndUpdate({ id: playerId }, { $set: newPlayerData }, { returnDocument: "after" });
 	}
 
-	public async updateScore(playerId: Player["id"], gameId: Game["id"], newScore: Score["score"]) {
-		return await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.SCORES)
-			.findOneAndUpdate(
-				{ playerId, gameId },
-				{ $set: { score: newScore } },
-				{ returnDocument: "after" },
-			);
+	public async updateScore(playerId: Player["id"], gameId: Game["id"], option: UpdateScoreOptions) {
+		const { type, value } = option;
+		let cursor = this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.SCORES);
+
+		const currentScore = (await cursor.findOne({ playerId, gameId })) as unknown as Score;
+		if (!currentScore) throw new Error("Not score found");
+
+		switch (type) {
+			case UPDATE_SCORE_OPTIONS_TYPES.ADD: {
+				try {
+					await cursor.findOneAndUpdate(
+						{ playerId, gameId },
+						{ $set: { score: currentScore.score + value } },
+						{ returnDocument: "after" },
+					);
+				} catch (err) {}
+			}
+			case UPDATE_SCORE_OPTIONS_TYPES.SUBTRACT: {
+				try {
+					await cursor.findOneAndUpdate(
+						{ playerId, gameId },
+						{ $set: { score: currentScore.score - value } },
+						{ returnDocument: "after" },
+					);
+				} catch (err) {}
+			}
+			case UPDATE_SCORE_OPTIONS_TYPES.SET:
+				{
+					try {
+						await cursor.findOneAndUpdate(
+							{ playerId, gameId },
+							{ $set: { score: value } },
+							{ returnDocument: "after" },
+						);
+					} catch (err) {}
+				}
+				const newScore = await cursor.findOne({ playerId, gameId });
+				if (!newScore) throw new Error("Error retrieving score");
+				return { playerId, gameId, score: newScore.score };
+		}
 	}
 
 	public async addGame(game: Omit<Game, "id">) {
-		const newGame = await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.GAMES)
-			.insertOne(game);
-		return await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.GAMES)
-			.findOne({ _id: newGame.insertedId });
+		try {
+			const newGame = await this.mongo
+				.db(MONGO_DB)
+				.collection(MONGO_COLLECTIONS.GAMES)
+				.insertOne(game);
+			const foundGame = await this.mongo
+				.db(MONGO_DB)
+				.collection(MONGO_COLLECTIONS.GAMES)
+				.findOne({ _id: newGame.insertedId });
+			if (!foundGame) throw new Error("Error adding game");
+			return { title: foundGame.title, id: foundGame._id.toString() };
+		} catch (err) {
+			throw err;
+		}
 	}
 
 	public async saveScore(score: Omit<Score, "id">) {
@@ -115,22 +154,22 @@ export default class MongoRepository implements Repository {
 			.findOne({ _id: newScore.insertedId });
 	}
 
-	public async savePlayer(player: Omit<Player, "id">) {
-		const newPlayer = await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.PLAYERS)
-			.insertOne(player);
-		return await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.PLAYERS)
-			.findOne({ _id: newPlayer.insertedId });
+	public async addPlayer(player: Omit<Player, "id">) {
+		const cursor = this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS);
+
+		const newPlayerRef = await cursor.insertOne(player);
+
+		const newPlayer = await cursor.findOne({ _id: newPlayerRef.insertedId });
+		if (!newPlayer) throw new Error("Error retrieving player after inserted");
+
+		return { id: newPlayer._id.toString(), nickname: newPlayer.nickname };
 	}
 
-	public async getPlayer(playerId: Player["id"]) {
-		return await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.PLAYERS)
-			.findOne({ _id: new ObjectId(playerId) });
+	public async findPlayer(playerId: Player["id"]) {
+		const cursor = this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.PLAYERS);
+		const player = await cursor.findOne({ _id: new ObjectId(playerId) });
+		if (!player) throw new Error("Not player found");
+		return { id: player._id.toString(), nickname: player.nickname };
 	}
 	public async getGame(gameId: Game["id"]) {
 		return await this.mongo
@@ -138,11 +177,15 @@ export default class MongoRepository implements Repository {
 			.collection(MONGO_COLLECTIONS.GAMES)
 			.findOne({ _id: new ObjectId(gameId) });
 	}
-	public async getScore(playerId: Player["id"], gameId: Game["id"]) {
-		return await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.SCORES)
-			.findOne({ playerId: new ObjectId(playerId), gameId: new ObjectId(gameId) });
+	public async findPlayerScoreByGame(playerId: Player["id"], gameId: Game["id"]) {
+		const cursor = this.mongo.db(MONGO_DB).collection(MONGO_COLLECTIONS.SCORES);
+		const score = await cursor.findOne({
+			playerId: new ObjectId(playerId),
+			gameId: new ObjectId(gameId),
+		});
+
+		if (!score) throw new Error("Not score found");
+		return { id: score._id.toString(), playerId, gameId, score: score.score };
 	}
 
 	public async getLeaderboardByGame(gameId: Game["id"]) {
@@ -196,6 +239,7 @@ export default class MongoRepository implements Repository {
 			.toArray();
 		return result;
 	}
+	
 }
 
 export const mongo = new MongoRepository();
