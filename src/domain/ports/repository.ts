@@ -12,8 +12,8 @@ type UpdateScoreOptions =
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SET; value: number };
 
 export default interface Repository {
-	addPlayer: () => Promise<Player>;
-	addGame: () => Promise<Game>;
+	addPlayer: (player: Omit<Player, "id">) => Promise<Player>;
+	addGame: (game: Omit<Game, "id">) => Promise<Game>;
 	updateScore: (
 		playerId: Player["id"],
 		gameId: Game["id"],
