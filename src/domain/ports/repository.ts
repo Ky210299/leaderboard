@@ -6,7 +6,7 @@ export const UPDATE_SCORE_OPTIONS_TYPES = {
 	SET: "set",
 } as const;
 
-type UpdateScoreOptions =
+export type UpdateScoreOptions =
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.ADD; value: number }
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SUBTRACT; value: number }
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SET; value: number };
