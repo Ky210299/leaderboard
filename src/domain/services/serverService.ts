@@ -6,4 +6,10 @@ export default class ServerService {
 	constructor(server: ServerPort) {
 		this.server = server;
 	}
+	public startServer() {
+		this.server.start();
+	}
+	public stopServer() {
+		this.server.stop();
+	}
 }
