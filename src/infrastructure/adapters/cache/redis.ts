@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import { CachePort } from "../../../domain";
 
 const { REDIS_HOST, REDIS_PORT } = process.env;
 
@@ -8,7 +9,7 @@ const client = createClient({
 	url: `redis://${REDIS_HOST}:${REDIS_PORT}`,
 });
 
-export default class RedisRepository {
+export default class RedisCache implements CachePort {
 	constructor() {
 		client.on("error", (err) => console.log("REDIS ERROR\n\t", err));
 		(async () => {

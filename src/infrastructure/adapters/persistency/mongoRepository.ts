@@ -1,4 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
+import { Repository } from "../../../domain";
 
 const { MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DB } = process.env;
 
@@ -24,7 +25,7 @@ export type Score = {
 export type Player = { id: ObjectId; nickname: string };
 export type Game = { id: ObjectId; title: string; plataform?: string };
 
-export default class MongoRepository {
+export default class MongoRepository implements Repository {
 	private readonly mongo;
 
 	constructor() {
