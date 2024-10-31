@@ -1,1 +1,4 @@
-export default interface ServerPort {}
+export default interface ServerPort {
+	start: () => void;
+	stop: () => void;
+}
