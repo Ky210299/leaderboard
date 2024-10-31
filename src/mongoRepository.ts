@@ -29,14 +29,9 @@ export default class MongoRepository {
 
 	constructor() {
 		this.mongo = new MongoClient(mongo_url);
-		(async () => {
-			try {
-				await this.init();
-				console.log("Connected to MongoDB");
-			} catch (err) {
-				console.log("\tMongoDb error\n\t", err);
-			}
-		})();
+		this.init()
+			.then((data) => console.log("Mongo Client connected: \n\t", data))
+			.catch((err) => console.log("Error connecting Mongo, \n\t", err));
 	}
 
 	private async init() {
