@@ -1,6 +1,6 @@
-import { Leaderboard } from "../DTOs";
+import { Game, Leaderboard } from "../DTOs";
 
 export default interface CachePort {
-	getLeaderboard: () => Promise<Leaderboard>;
-	updateLeaderboard: () => Promise<void>;
+	getLeaderboardByGame: (game: Game["id"]) => Promise<Leaderboard>;
+	updateLeaderboardByGame: (game: Game["id"]) => Promise<void>;
 }
