@@ -1,14 +1,14 @@
 import { Game, Player, Score } from "../DTOs";
 
-const UPDATE_SCORE_OPTIONS_TYPES = {
+export const UPDATE_SCORE_OPTIONS_TYPES = {
 	ADD: "add",
-	SUBSTRACT: "sub",
+	SUBTRACT: "sub",
 	SET: "set",
 } as const;
 
 type UpdateScoreOptions =
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.ADD; value: number }
-	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SUBSTRACT; value: number }
+	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SUBTRACT; value: number }
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SET; value: number };
 
 export default interface Repository {
