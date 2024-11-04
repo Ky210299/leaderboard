@@ -1,25 +1,24 @@
-export interface Player {
+export interface Participant {
 	id: string;
-	nickname: string;
+	name: string;
 }
 
-export interface Game {
-	id: string;
+export interface Activity {
+	category: string;
 	title: string;
 	plataform?: string;
+	region?: string;
 }
 
 export interface Score {
-	playerId: Player["id"];
-	gameId: Game["id"];
-	score: number;
+	value: number;
 }
 
 export type Leaderboard = [
 	{
 		rank: number;
-		player: Player;
-		score: Score["score"];
-		game: Game;
+		participant: Participant;
+		activity: Activity;
+		score: Score["value"];
 	},
 ];

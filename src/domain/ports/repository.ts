@@ -1,4 +1,4 @@
-import { Game, Player, Score } from "../DTOs";
+import { Activity, Leaderboard, Participant, Score } from "../DTOs";
 
 export const UPDATE_SCORE_OPTIONS_TYPES = {
 	ADD: "add",
@@ -12,16 +12,22 @@ export type UpdateScoreOptions =
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SET; value: number };
 
 export default interface Repository {
-	addPlayer: (player: Omit<Player, "id">) => Promise<Player>;
-	addGame: (game: Omit<Game, "id">) => Promise<Game>;
+	addParticipant: (participant: Omit<Participant, "id">) => Promise<Participant>;
+
 	updateScore: (
-		playerId: Player["id"],
-		gameId: Game["id"],
-		newScore: UpdateScoreOptions,
+		particiapant: Participant["id"],
+		activity: Activity,
+		scoreValue: UpdateScoreOptions,
 	) => Promise<Score>;
-	findPlayer: (playerId: Player["id"]) => Promise<Player>;
-	findPlayerScores: (playerId: Player["id"]) => Promise<Score[]>;
-	findPlayerScoreByGame: (playerId: Player["id"], gameId: Game["id"]) => Promise<Score>;
-	deletePlayerById: (playerId: Player["id"]) => Promise<void>;
-	deleteGameById: (gameId: Game["id"]) => Promise<void>;
+
+	findParticipant: (participantId: Participant["id"]) => Promise<Participant>;
+
+	findAllParticipants: () => Promise<Participant[]>;
+
+	findParticipantScoreByActivity: (
+		participantId: Participant["id"],
+		activity: Activity,
+	) => Promise<Leaderboard>;
+
+	deleteParticipantById: (participantId: Participant["id"]) => Promise<void>;
 }
