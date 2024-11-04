@@ -15,7 +15,7 @@ export default interface Repository {
 	addParticipant: (participant: Omit<Participant, "id">) => Promise<Participant>;
 
 	updateScore: (
-		particiapant: Participant["id"],
+		participantId: Participant["id"],
 		activity: Activity,
 		scoreValue: UpdateScoreOptions,
 	) => Promise<Score>;
