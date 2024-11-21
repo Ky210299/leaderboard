@@ -12,22 +12,25 @@ export type UpdateScoreOptions =
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SET; value: number };
 
 export default interface Repository {
-	addParticipant: (participant: Omit<Participant, "id">) => Promise<Participant>;
+	addParticipant: (participant: Participant) => Promise<void>;
 
-	updateScore: (
+	findParticipantById: (participantId: Participant["id"]) => Promise<Participant | null>;
+
+	findParticipantByName: (participantName: Participant["name"]) => Promise<Participant | null>;
+
+	sumToScore: (
 		participantId: Participant["id"],
 		activity: Activity,
-		scoreValue: UpdateScoreOptions,
-	) => Promise<Score>;
+		score: Score["value"],
+	) => Promise<void>;
 
-	findParticipant: (participantId: Participant["id"]) => Promise<Participant>;
+	setScore: (
+		participantId: Participant["id"],
+		activity: Activity,
+		score: Score["value"],
+	) => Promise<void>;
 
 	findAllParticipants: () => Promise<Participant[]>;
-
-	findParticipantScoreByActivity: (
-		participantId: Participant["id"],
-		activity: Activity,
-	) => Promise<Leaderboard>;
 
 	deleteParticipantById: (participantId: Participant["id"]) => Promise<void>;
 }

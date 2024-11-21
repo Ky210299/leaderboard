@@ -4,6 +4,7 @@ export interface Participant {
 }
 
 export interface Activity {
+	id: string;
 	category: string;
 	title: string;
 	plataform?: string;
