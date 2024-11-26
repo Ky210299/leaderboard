@@ -20,11 +20,9 @@ const MONGO_COLLECTIONS = {
 	LEADERBOARD: "leaderboard",
 };
 
-type MongoLeaderboard = {
-	participant: Participant;
-	activity?: Activity;
-	score?: Score["value"];
-};
+type MongoLeaderboard =
+	| Participant
+	| (Participant & { activity: Activity } & { score: Score["value"] });
 
 type ParticipantWithActivities = {
 	id: Participant["id"];
@@ -57,7 +55,7 @@ export default class MongoRepository implements Repository {
 
 	// Insert a participant
 	public async addParticipant(participant: Participant) {
-		await this.leaderboardSchema.insertOne({ participant: participant });
+		await this.leaderboardSchema.insertOne({ ...participant });
 	}
 
 	public async findAllParticipants() {
@@ -79,9 +77,7 @@ export default class MongoRepository implements Repository {
 			},
 		});
 
-		const participants = await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
+		const participants = await this.leaderboardSchema
 			.aggregate(pipeline, options)
 			.project<
 				Participant & { activities: Array<Activity & Score["value"]> }
@@ -91,20 +87,17 @@ export default class MongoRepository implements Repository {
 	}
 
 	public async findParticipantById(participantId: Participant["id"]) {
-		const participant = await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
-			.findOne({ id: participantId });
+		const participant = await this.leaderboardSchema.findOne({ id: participantId });
 		if (!participant) return null;
 		const { id, name } = participant;
 		return { id, name };
 	}
 
 	public async findParticipantByName(participantName: Participant["name"]) {
-		const participant = await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
-			.findOne<Participant | null>({ name: participantName }, { projection: { id: 1, name: 1 } });
+		const participant = await this.leaderboardSchema.findOne<Participant | null>(
+			{ name: participantName },
+			{ projection: { id: 1, name: 1 } },
+		);
 		if (!participant) return null;
 
 		const participantWithActivities: ParticipantWithActivities = {
@@ -112,10 +105,10 @@ export default class MongoRepository implements Repository {
 			activities: [],
 		};
 
-		const activities = this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
-			.find({ id: participant.id }, { projection: { activity: 1, score: 1 } });
+		const activities = this.leaderboardSchema.find(
+			{ id: participant.id },
+			{ projection: { activity: 1, score: 1 } },
+		);
 
 		while (await activities.hasNext()) {
 			const nextActivity = (await activities.next()) as ActivityAndScore | null;
@@ -126,44 +119,27 @@ export default class MongoRepository implements Repository {
 		return participant;
 	}
 
-	private async findActivitiesOfParticipant(participantId: Participant["id"]) {
-		const activities = await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
-			.find({ id: participantId }, { projection: { activity: 1, score: 1 } })
-			.toArray();
-		return activities;
-	}
-
-	private async findActivityOfParticiapnt(
+	private async findActivityOfParticipant(
 		participantId: Participant["id"],
 		activityId: Activity["id"],
 	) {
-		const activity = await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
-			.findOne(
-				{ id: participantId, activity: { id: activityId } },
-				{ projection: { activity: 1 } },
-			);
+		const activity = await this.leaderboardSchema.findOne<ActivityAndScore & { _id: ObjectId }>(
+			{ id: participantId, activity: { id: activityId } },
+			{ projection: { _id: 1, activity: 1, score: 1 } },
+		);
 		if (activity == null) return null;
-		const { _id, id, title, category, plataform, region, score } = activity;
-		return { _id, id, title, category, plataform, region, score };
+		return { ...activity };
 	}
 
 	private async updateScore(id: ObjectId, newScore: Score["value"]) {
-		await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
-			.updateOne({ _id: id }, { $set: { score: newScore } });
+		await this.leaderboardSchema.updateOne({ _id: id }, { $set: { score: newScore } });
 	}
 
 	public async sumToScore(participantId: Participant["id"], activity: Activity, score: number) {
-		const participantActivity = await this.findActivityOfParticiapnt(participantId, activity.id);
+		const participantActivity = await this.findActivityOfParticipant(participantId, activity.id);
 		if (participantActivity === null) throw 1;
 
 		const { _id, score: oldScore } = participantActivity;
-		if (_id == null) throw 1;
 
 		if (oldScore == null || typeof oldScore !== "number") {
 			await this.updateScore(_id, score);
@@ -174,7 +150,7 @@ export default class MongoRepository implements Repository {
 	}
 
 	public async setScore(participantId: Participant["id"], activity: Activity, score: number) {
-		const participantActivity = await this.findActivityOfParticiapnt(participantId, activity.id);
+		const participantActivity = await this.findActivityOfParticipant(participantId, activity.id);
 		if (participantActivity === null) throw 1;
 
 		const { _id } = participantActivity;
@@ -184,10 +160,7 @@ export default class MongoRepository implements Repository {
 	}
 
 	public async deleteParticipantById(participantId: Participant["id"]) {
-		await this.mongo
-			.db(MONGO_DB)
-			.collection(MONGO_COLLECTIONS.LEADERBOARD)
-			.deleteOne({ id: participantId });
+		await this.leaderboardSchema.deleteOne({ id: participantId });
 	}
 }
 
