@@ -1,7 +1,6 @@
 import { mongoPersistencyService } from ".";
 import { CacheService, PersistencyService, ServerService } from "../domain";
 import { Participant } from "../domain/DTOs";
-import MongoRepository from "../infrastructure/adapters/persistency/mongoRepository";
 
 class UseCases {
 	protected readonly persistence: PersistencyService | null;
