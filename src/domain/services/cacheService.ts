@@ -1,4 +1,4 @@
-import { Game } from "../DTOs";
+import { Activity } from "../DTOs";
 import CachePort from "../ports/cache";
 
 export default class CacheService {
@@ -7,11 +7,11 @@ export default class CacheService {
 		this.cache = cacheAdapter;
 	}
 
-	public async saveLeaderboardByGameId(gameId: Game["id"]) {
-		return await this.cache.updateLeaderboardByGame(gameId);
+	public async saveLeaderboardByGameId(gameId: Activity["id"]) {
+		return;
 	}
 
-	public async getLeaderboardByGame(gameId: Game["id"]) {
-		return await this.cache.getLeaderboardByGame(gameId);
+	public async getLeaderboardByGame(gameId: Activity["id"]) {
+		return;
 	}
 }
