@@ -1,6 +1,6 @@
-import app from "./server";
+import ExpressServer from "./infrastructure/adapters/server/express";
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-	console.log(`Server running in port ${PORT}`);
-});
+const server = new ExpressServer();
+const { PORT } = process.env;
+if (!PORT) throw new Error("Not PORT found");
+server.start(Number(PORT));
