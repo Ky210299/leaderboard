@@ -1,4 +1,4 @@
-import express, { json } from "express";
+import express, { json, Request, Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -13,8 +13,7 @@ app.use(morgan("dev"));
 app.use(helmet());
 
 // ROUTES
-
-app.get("live", async (req, res) => {
+app.get("/live", async (req: Request, res: Response) => {
 	res.send("live");
 });
 
