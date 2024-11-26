@@ -1,12 +1,17 @@
 import { Collection, MongoClient, ObjectId } from "mongodb";
 import { Repository } from "../../../domain";
 import { Activity, Participant, Score } from "../../../domain/DTOs";
-import { Pool } from "mysql2/typings/mysql/lib/Pool";
 
 const { MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DB } = process.env;
 
 if (!MONGO_USER || !MONGO_PASSWORD || !MONGO_HOST || !MONGO_DB) {
-	throw new Error("Bad Credentials");
+	const missingVars = [
+		!MONGO_USER && "MONGO_USER",
+		!MONGO_PASSWORD && "MONGO_PASSWORD",
+		!MONGO_HOST && "MONGO_HOST",
+		!MONGO_DB && "MONGO_DB",
+	].filter(Boolean);
+	throw new Error(`Missing environment variables: ${missingVars.join(", ")}`);
 }
 
 export const mongo_url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT || 27017}`;
