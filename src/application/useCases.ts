@@ -53,4 +53,19 @@ class CreateParticipant extends UseCases {
 		await this.persistence?.addParticipant(participant);
 	}
 }
+
+class FindAllParticipants extends UseCases {
+	constructor(persistenceService: PersistencyService) {
+		if (UseCases.isValidPersistencyServiceInstance(persistenceService) === false) {
+			throw new Error('The "Create Participant Use Case" need a valid persistency instance');
+		}
+		super(persistenceService, null, null);
+	}
+
+	async execute() {
+		return await this.persistence?.findAllParticipants();
+	}
+}
+
+export const findAllParticipants = new FindAllParticipants(mongoPersistencyService);
 export const createParticipant = new CreateParticipant(mongoPersistencyService);

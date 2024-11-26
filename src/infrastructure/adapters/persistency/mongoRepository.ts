@@ -65,30 +65,23 @@ export default class MongoRepository implements Repository {
 
 	public async findAllParticipants() {
 		const pipeline = [];
-		const options = {};
 
 		pipeline.push({
 			$group: {
-				id: "$id",
+				_id: "$id",
 				name: { $first: "$name" },
-				activities: {
-					$push: {
-						title: "$activity.title",
-						category: "$activity.category",
-						plataform: "$activity.plataform",
-						score: "$score",
-					},
-				},
 			},
 		});
 
-		const participants = await this.leaderboardSchema
-			.aggregate(pipeline, options)
-			.project<
-				Participant & { activities: Array<Activity & Score["value"]> }
-			>({ id: 1, name: 1, activities: 1 })
-			.toArray();
-		return participants;
+		pipeline.push({
+			$project: {
+				_id: 0,
+				id: "$_id",
+				name: 1,
+			},
+		});
+
+		return await this.leaderboardSchema.aggregate<Participant>(pipeline).toArray();
 	}
 
 	public async findParticipantById(participantId: Participant["id"]) {
