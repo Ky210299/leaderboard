@@ -53,6 +53,11 @@ export default class MongoRepository implements Repository {
 		console.log("\tMongo db statistics:\n\t", dbStats);
 	}
 
+	public async existParticipant(id: Participant["id"]) {
+		const participant = await this.leaderboardSchema.findOne({ id }, { projection: { _id: 1 } });
+		return participant != null;
+	}
+
 	// Insert a participant
 	public async addParticipant(participant: Participant) {
 		await this.leaderboardSchema.insertOne({ ...participant });
