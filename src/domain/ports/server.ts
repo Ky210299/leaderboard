@@ -1,4 +1,4 @@
 export default interface ServerPort {
-	start: () => void;
+	start: (port: number) => void;
 	stop: () => void;
 }
