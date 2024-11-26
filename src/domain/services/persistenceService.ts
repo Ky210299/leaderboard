@@ -19,7 +19,7 @@ export default class PersistencyService {
 		score: Score["value"],
 	) {
 		if (!score || score === 0) return;
-		this.persistency.sumToScore(participantId, activity, score);
+		await this.persistency.sumToScore(participantId, activity, score);
 	}
 
 	public async subtractToScore(
@@ -31,7 +31,7 @@ export default class PersistencyService {
 
 		const existParticipant = await this.persistency.findParticipantById(participantId);
 		if (existParticipant == null) throw new Error("Participant not found");
-		this.persistency.sumToScore(participantId, activity, -score);
+		await this.persistency.sumToScore(participantId, activity, -score);
 	}
 
 	public async setScore(
@@ -42,7 +42,7 @@ export default class PersistencyService {
 		const existParticipant = await this.persistency.findParticipantById(participantId);
 		if (existParticipant == null) throw new Error("Participant not found");
 
-		this.persistency.setScore(participantId, activity, score);
+		await this.persistency.setScore(participantId, activity, score);
 	}
 
 	public async findParticipantById(participantId: Participant["id"]) {
@@ -54,6 +54,6 @@ export default class PersistencyService {
 	}
 
 	public async deleteParticipant(participantId: Participant["id"]) {
-		this.persistency.deleteParticipantById(participantId);
+		await this.persistency.deleteParticipantById(participantId);
 	}
 }
