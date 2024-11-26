@@ -1,5 +1,7 @@
+import { mongoPersistencyService } from ".";
 import { CacheService, PersistencyService, ServerService } from "../domain";
 import { Participant } from "../domain/DTOs";
+import MongoRepository from "../infrastructure/adapters/persistency/mongoRepository";
 
 class UseCases {
 	protected readonly persistence: PersistencyService | null;
@@ -37,7 +39,7 @@ class UseCases {
 	}
 }
 
-export class CreateParticipant extends UseCases {
+class CreateParticipant extends UseCases {
 	constructor(persistenceService: PersistencyService) {
 		if (UseCases.isValidPersistencyServiceInstance(persistenceService) === false) {
 			throw new Error('The "Create Participant Use Case" need a valid persistency instance');
@@ -52,3 +54,4 @@ export class CreateParticipant extends UseCases {
 		await this.persistence?.addParticipant(participant);
 	}
 }
+export const createParticipant = new CreateParticipant(mongoPersistencyService);
