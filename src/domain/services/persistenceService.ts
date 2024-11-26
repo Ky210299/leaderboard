@@ -10,7 +10,7 @@ export default class PersistencyService {
 
 	public async addParticipant(participant: Participant) {
 		if (!participant.id || !participant.name) throw new Error("Invalid participant data");
-		const alreadyExistParticipant = await this.existParticipant(participant.id);
+		const alreadyExistParticipant = await this.persistency.existParticipant(participant.id);
 		if (alreadyExistParticipant) return;
 		return this.persistency.addParticipant(participant);
 	}
