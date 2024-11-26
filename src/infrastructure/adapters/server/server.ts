@@ -13,6 +13,11 @@ app.use(morgan("dev"));
 app.use(helmet());
 
 // ROUTES
+
+app.get("live", async (req, res) => {
+	res.send("live");
+});
+
 app.use("/v1", leaderboardRouter);
 
 export default app;
