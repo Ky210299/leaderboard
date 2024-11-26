@@ -1,5 +1,6 @@
-import MongoRepository from "./mongoRepository";
-import RedisRepository from "./redisRepository";
+import app from "./server";
 
-const mongo = new MongoRepository();
-
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+	console.log(`Server running in port ${PORT}`);
+});
