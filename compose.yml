@@ -12,6 +12,8 @@ services:
       - redis
     networks:
       - ranking-network
+    ports:
+      - ${PORT}:${PORT}
     volumes:
       - ./dist/:/app/dist/
     develop:
@@ -28,7 +30,7 @@ services:
     image: redis/redis-stack:latest
     networks:
       - ranking-network
-      
+
   mongodb:
     image: mongodb/mongodb-community-server:latest
     volumes:
