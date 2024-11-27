@@ -12,6 +12,11 @@ export type UpdateScoreOptions =
 	| { type: typeof UPDATE_SCORE_OPTIONS_TYPES.SET; value: number };
 
 export default interface Repository {
+	updateParticipant: (
+		participantId: Participant["id"],
+		participantData: Partial<Participant>,
+	) => Promise<void>;
+
 	existParticipant: (participantId: Participant["id"]) => Promise<boolean>;
 
 	addParticipant: (participant: Participant) => Promise<void>;

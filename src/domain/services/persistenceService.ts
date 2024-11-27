@@ -11,8 +11,22 @@ export default class PersistencyService {
 	public async addParticipant(participant: Participant) {
 		if (!participant.id || !participant.name) throw new Error("Invalid participant data");
 		const alreadyExistParticipant = await this.persistency.existParticipant(participant.id);
-		if (alreadyExistParticipant) return;
-		return this.persistency.addParticipant(participant);
+		if (alreadyExistParticipant) return false;
+		await this.persistency.addParticipant(participant);
+		return true;
+	}
+
+	public async updateParticipant(
+		participantId: Participant["id"],
+		participantData: Partial<Participant>,
+	) {
+		const mappedData: Partial<Participant> = {};
+		Object.entries(participantData).forEach(([key, value]) => {
+			if (value != null) {
+				mappedData[key as keyof Participant] = value;
+			}
+		});
+		await this.persistency.updateParticipant(participantId, mappedData);
 	}
 
 	public async addToScore(

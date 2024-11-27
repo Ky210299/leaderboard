@@ -25,4 +25,8 @@ export default class CacheService {
 	public async saveParticipants(participants: Participant[]) {
 		await this.cache.save("participants", participants);
 	}
+
+	public async delete(cacheKey: string) {
+		await this.cache.delete(cacheKey);
+	}
 }

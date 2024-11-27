@@ -60,7 +60,7 @@ export default class MongoRepository implements Repository {
 
 	// Insert a participant
 	public async addParticipant(participant: Participant) {
-		await this.leaderboardSchema.insertOne({ ...participant });
+		await this.leaderboardSchema.insertOne({ ...participant, id: participant.id.toString() });
 	}
 
 	public async findAllParticipants() {
@@ -131,6 +131,17 @@ export default class MongoRepository implements Repository {
 
 	private async updateScore(id: ObjectId, newScore: Score["value"]) {
 		await this.leaderboardSchema.updateOne({ _id: id }, { $set: { score: newScore } });
+	}
+
+	public async updateParticipant(
+		participantId: Participant["id"],
+		participantData: Partial<Participant>,
+	) {
+		if (participantId == null) throw new Error("Invalid id");
+		await this.leaderboardSchema.updateMany(
+			{ id: participantId },
+			{ $set: { ...participantData } },
+		);
 	}
 
 	public async sumToScore(participantId: Participant["id"], activity: Activity, score: number) {

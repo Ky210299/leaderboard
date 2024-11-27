@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { createParticipant, findAllParticipants } from "../../../application/useCases";
+import {
+	createParticipant,
+	findAllParticipants,
+	updateParticipant,
+} from "../../../application/useCases";
 
 const router = Router();
 
@@ -22,5 +26,26 @@ router.get("/participants", async (req: Request, res: Response, next: NextFuncti
 		res.status(500).json({ success: false });
 	}
 });
+
+router.patch(
+	"/participant/:participantId",
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { participantId } = req.params;
+		const { id, name } = req.body;
+
+		console.log("pid: \n", participantId, "body: \n", req.body);
+
+		if (!participantId) res.status(400).json({ success: false, message: "Invalid data" });
+		if (!id && !name) res.status(204).send();
+
+		try {
+			const updatedParticipant = await updateParticipant.execute(participantId, { id, name });
+			res.status(200).json({ success: true, data: updatedParticipant });
+		} catch (err) {
+			console.log(err);
+			res.status(500).json({ success: false });
+		}
+	},
+);
 
 export { router as leaderboardRouter };

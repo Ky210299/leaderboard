@@ -42,6 +42,10 @@ export default class RedisCache implements CachePort {
 		if (value == null) return null;
 		return JSON.parse(value);
 	}
+
+	public async delete(cacheKey: string) {
+		await client.del(cacheKey);
+	}
 }
 
 export const redis = new RedisCache();

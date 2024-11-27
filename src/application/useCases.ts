@@ -39,18 +39,21 @@ class UseCases {
 }
 
 class CreateParticipant extends UseCases {
-	constructor(persistenceService: PersistencyService) {
+	constructor(persistenceService: PersistencyService, cacheService: CacheService) {
 		if (UseCases.isValidPersistencyServiceInstance(persistenceService) === false) {
 			throw new Error('The "Create Participant Use Case" need a valid persistency instance');
+		} else if (UseCases.isValidCacheServiceInstance(cacheService) === false) {
+			throw new Error('The "Create Participant Use Case" need a valid cache instance');
 		}
-		super(persistenceService, null, null);
+		super(persistenceService, cacheService, null);
 	}
 
 	async execute(participant: Participant) {
 		if (participant == null) throw new Error("Invalid participant data");
 		const { id, name } = participant;
 		if (id == null || !name) throw new Error("Invalid participant data");
-		await this.persistence?.addParticipant(participant);
+		const added = await this.persistence?.addParticipant(participant);
+		if (added) await this.cache?.delete("participants");
 	}
 }
 
@@ -76,8 +79,27 @@ class FindAllParticipants extends UseCases {
 	}
 }
 
+class UpdateParticipant extends UseCases {
+	constructor(persistenceService: PersistencyService, cacheService: CacheService) {
+		if (UseCases.isValidPersistencyServiceInstance(persistenceService) === false) {
+			throw new Error('The "Create Participant Use Case" need a valid persistency instance');
+		} else if (UseCases.isValidCacheServiceInstance(cacheService) === false) {
+			throw new Error('The "Create Participant Use Case" need a valid cache instance');
+		}
+		super(persistenceService, cacheService, null);
+	}
+
+	public async execute(participantId: Participant["id"], participantData: Partial<Participant>) {
+		if (participantData == null) throw new Error("Invalid data");
+		await this.persistence?.updateParticipant(participantId, participantData);
+		await this.cache?.delete("participants");
+		return await this.persistence?.findParticipantById(participantId);
+	}
+}
+
+export const updateParticipant = new UpdateParticipant(mongoPersistencyService, redisCacheService);
 export const findAllParticipants = new FindAllParticipants(
 	mongoPersistencyService,
 	redisCacheService,
 );
-export const createParticipant = new CreateParticipant(mongoPersistencyService);
+export const createParticipant = new CreateParticipant(mongoPersistencyService, redisCacheService);
