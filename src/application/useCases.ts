@@ -69,7 +69,6 @@ class FindAllParticipants extends UseCases {
 		if (cachedValue !== null) {
 			return cachedValue;
 		} else {
-			console.log("Not cached on redis, saving...");
 			const participants = await this.persistence?.findAllParticipants();
 			if (participants != null) await this.cache?.saveParticipants(participants);
 			return participants;
