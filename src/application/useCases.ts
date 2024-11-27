@@ -1,4 +1,4 @@
-import { mongoPersistencyService } from ".";
+import { mongoPersistencyService, redisCacheService } from ".";
 import { CacheService, PersistencyService, ServerService } from "../domain";
 import { Participant } from "../domain/DTOs";
 
@@ -55,17 +55,30 @@ class CreateParticipant extends UseCases {
 }
 
 class FindAllParticipants extends UseCases {
-	constructor(persistenceService: PersistencyService) {
+	constructor(persistenceService: PersistencyService, cacheService: CacheService) {
 		if (UseCases.isValidPersistencyServiceInstance(persistenceService) === false) {
 			throw new Error('The "Create Participant Use Case" need a valid persistency instance');
+		} else if (UseCases.isValidCacheServiceInstance(cacheService) === false) {
+			throw new Error('The "Create Participant Use Case" need a valid cache instance');
 		}
-		super(persistenceService, null, null);
+		super(persistenceService, cacheService, null);
 	}
 
 	async execute() {
-		return await this.persistence?.findAllParticipants();
+		const cachedValue = await this.cache?.getParticipants();
+		if (cachedValue !== null) {
+			return cachedValue;
+		} else {
+			console.log("Not cached on redis, saving...");
+			const participants = await this.persistence?.findAllParticipants();
+			if (participants != null) await this.cache?.saveParticipants(participants);
+			return participants;
+		}
 	}
 }
 
-export const findAllParticipants = new FindAllParticipants(mongoPersistencyService);
+export const findAllParticipants = new FindAllParticipants(
+	mongoPersistencyService,
+	redisCacheService,
+);
 export const createParticipant = new CreateParticipant(mongoPersistencyService);
