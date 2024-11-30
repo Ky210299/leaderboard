@@ -10,6 +10,4 @@ A simple leaderboard for games
 - Run in terminal:
 `docker compose up --build -d`
 
-## Test connection 
-`curl localhost:port/live
 
