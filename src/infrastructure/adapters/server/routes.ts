@@ -1,9 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import {
-	createParticipant,
-	findAllParticipants,
-	updateParticipant,
-} from "../../../application/useCases";
+import { createParticipant, findAllParticipants, updateParticipant } from "../../../application";
 
 const router = Router();
 
