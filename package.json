@@ -5,8 +5,8 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "tsc",
-		"start": "tsc && node ./dist/main.js",
-		"dev": "node dist/main.js --watch"
+		"start": "NODE_ENV=production docker compose up --build -d",
+		"dev": "tsc && docker compose up --build --watch"
 	},
 	"keywords": [],
 	"author": "",
