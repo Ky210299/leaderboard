@@ -11,8 +11,8 @@ You can use this application to create a leaderboard for your game or any other 
 
 ### 1️⃣ Create `.env`
 
-- Create a `.env` file in the root directory using the provided `.env.template` file as a reference.
-- Fill in the required values.
+-   Create a `.env` file in the root directory using the provided `.env.template` file as a reference.
+-   Fill in the required values.
 
 ---
 
@@ -38,13 +38,13 @@ npm run dev
 
 **🐳 Run with Docker:**
 
-- Standard build
+-   Standard build
 
 ```bash
 docker compose up --build -d
 ```
 
-- With hot reload:
+-   With hot reload:
 
 ```bash
 docker compose up --build --watch

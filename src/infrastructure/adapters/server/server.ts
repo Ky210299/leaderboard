@@ -14,7 +14,7 @@ app.use(helmet());
 
 // ROUTES
 app.get("/live", async (req: Request, res: Response) => {
-	res.send("live");
+    res.send("live");
 });
 
 app.use("/v1", leaderboardRouter);
