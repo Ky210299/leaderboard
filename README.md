@@ -41,11 +41,11 @@ npm run dev
 -   Standard build
 
 ```bash
-docker compose up --build -d
+npx tsc && docker compose up --build -d
 ```
 
 -   With hot reload:
 
 ```bash
-docker compose up --build --watch
+npx tsc && docker compose up --build --watch
 ```
