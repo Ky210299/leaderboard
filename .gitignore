@@ -8,7 +8,7 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # Git
-*~$
+*~
 .*.swp
 .*.un~
 
