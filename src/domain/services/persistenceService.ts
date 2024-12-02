@@ -1,5 +1,5 @@
-import { Activity, Leaderboard, Participant, Score } from "../DTOs";
-import Repository, { UPDATE_SCORE_OPTIONS_TYPES } from "../ports/repository";
+import { Activity, Participant, Score } from "../DTOs";
+import Repository from "../ports/repository";
 
 export default class PersistencyService {
     private readonly persistency: Repository;
@@ -10,9 +10,16 @@ export default class PersistencyService {
 
     public async addParticipant(participant: Participant) {
         if (!participant.id || !participant.name) throw new Error("Invalid participant data");
-        const alreadyExistParticipant = await this.persistency.existParticipant(participant.id);
+        const mappedParticipant: Participant = {
+            ...participant,
+            id: participant.id.toString(),
+        };
+
+        const alreadyExistParticipant = await this.persistency.existParticipant(
+            mappedParticipant.id,
+        );
         if (alreadyExistParticipant) return false;
-        await this.persistency.addParticipant(participant);
+        await this.persistency.addParticipant(mappedParticipant);
         return true;
     }
 
@@ -35,7 +42,13 @@ export default class PersistencyService {
         score: Score["value"],
     ) {
         if (!score || score === 0) return;
-        await this.persistency.sumToScore(participantId, activity, score);
+
+        const mappedActivity: Activity = {
+            ...activity,
+            id: activity.id.toString(),
+        };
+
+        await this.persistency.sumToScore(participantId, mappedActivity, Math.abs(score));
     }
 
     public async subtractToScore(
@@ -47,7 +60,13 @@ export default class PersistencyService {
 
         const existParticipant = await this.persistency.findParticipantById(participantId);
         if (existParticipant == null) throw new Error("Participant not found");
-        await this.persistency.sumToScore(participantId, activity, -score);
+
+        const mappedActivity: Activity = {
+            ...activity,
+            id: activity.id.toString(),
+        };
+
+        await this.persistency.sumToScore(participantId, mappedActivity, -Math.abs(score));
     }
 
     public async setScore(
@@ -55,14 +74,26 @@ export default class PersistencyService {
         activity: Activity,
         score: Score["value"],
     ) {
+        let scoreToSet;
+        if (typeof score !== "number" || score == null) scoreToSet = activity.initialScore || 0;
+        else scoreToSet = score;
+
         const existParticipant = await this.persistency.findParticipantById(participantId);
         if (existParticipant == null) throw new Error("Participant not found");
 
-        await this.persistency.setScore(participantId, activity, score);
+        const mappedActivity: Activity = {
+            ...activity,
+            id: activity.id.toString(),
+        };
+
+        await this.persistency.setScore(participantId, mappedActivity, scoreToSet);
     }
 
     public async findParticipantById(participantId: Participant["id"]) {
-        return this.persistency.findParticipantById(participantId);
+        const participant = await this.persistency.findParticipantById(participantId);
+        if (!participant) return null;
+        const { id, name } = participant;
+        return { id, name };
     }
 
     public async findAllParticipants() {

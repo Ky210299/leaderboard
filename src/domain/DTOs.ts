@@ -5,10 +5,11 @@ export interface Participant {
 
 export interface Activity {
     id: string;
-    category: string;
-    title: string;
+    category?: string;
+    title?: string;
     plataform?: string;
     region?: string;
+    initialScore?: number;
 }
 
 export interface Score {

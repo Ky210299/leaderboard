@@ -12,3 +12,6 @@ export const redisCacheService = new CacheService(redis);
 export { findAllParticipants } from "./findAllParticipants";
 export { createParticipant } from "./createParticipant";
 export { updateParticipant } from "./updateParticipant";
+export { addScore } from "./addScore";
+export { setScore } from "./setScore";
+export { subtractScore } from "./subtractScore";

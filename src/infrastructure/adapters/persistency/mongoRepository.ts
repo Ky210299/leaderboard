@@ -50,7 +50,6 @@ export default class MongoRepository implements Repository {
     private async init() {
         await this.mongo.connect();
         const dbStats = await this.mongo.db(MONGO_DB).stats();
-        console.log("\tMongo db statistics:\n\t", dbStats);
     }
 
     public async existParticipant(id: Participant["id"]) {
@@ -63,7 +62,7 @@ export default class MongoRepository implements Repository {
 
     // Insert a participant
     public async addParticipant(participant: Participant) {
-        await this.leaderboardSchema.insertOne({ ...participant, id: participant.id.toString() });
+        await this.leaderboardSchema.insertOne({ ...participant, id: participant.id });
     }
 
     public async findAllParticipants() {
@@ -89,9 +88,9 @@ export default class MongoRepository implements Repository {
 
     public async findParticipantById(participantId: Participant["id"]) {
         const participant = await this.leaderboardSchema.findOne({ id: participantId });
-        if (!participant) return null;
-        const { id, name } = participant;
-        return { id, name };
+        if (participant === null) return null;
+        const { _id, id, name } = participant;
+        return { _id, id, name };
     }
 
     public async findParticipantByName(participantName: Participant["name"]) {
@@ -125,11 +124,27 @@ export default class MongoRepository implements Repository {
         activityId: Activity["id"],
     ) {
         const activity = await this.leaderboardSchema.findOne<ActivityAndScore & { _id: ObjectId }>(
-            { id: participantId, activity: { id: activityId } },
+            { id: participantId, "activity.id": activityId },
             { projection: { _id: 1, activity: 1, score: 1 } },
         );
         if (activity == null) return null;
         return { ...activity };
+    }
+
+    private async addActivityToParticipant(
+        participantId: Participant["id"],
+        activity: Activity,
+        initialScore?: Score["value"],
+    ) {
+        const participant = await this.findParticipantById(participantId);
+        if (participant == null) throw new Error("Participant not found");
+        const { id, name } = participant;
+        await this.leaderboardSchema.insertOne({
+            id,
+            name,
+            activity,
+            score: initialScore != null ? initialScore : activity.initialScore || 0,
+        });
     }
 
     private async updateScore(id: ObjectId, newScore: Score["value"]) {
@@ -152,16 +167,16 @@ export default class MongoRepository implements Repository {
             participantId,
             activity.id,
         );
-        if (participantActivity === null) throw 1;
+        if (participantActivity === null) {
+            return await this.addActivityToParticipant(
+                participantId,
+                activity,
+                (activity.initialScore || 0) + score,
+            );
+        }
 
         const { _id, score: oldScore } = participantActivity;
-
-        if (oldScore == null || typeof oldScore !== "number") {
-            await this.updateScore(_id, score);
-        } else {
-            const newScore = oldScore + score;
-            await this.updateScore(_id, newScore);
-        }
+        await this.updateScore(_id, oldScore + score);
     }
 
     public async setScore(participantId: Participant["id"], activity: Activity, score: number) {
@@ -169,12 +184,12 @@ export default class MongoRepository implements Repository {
             participantId,
             activity.id,
         );
-        if (participantActivity === null) throw 1;
-
+        // TODO: create public method to check if activity exists and use it in persistence service
+        if (participantActivity === null) {
+            return await this.addActivityToParticipant(participantId, activity, score);
+        }
         const { _id } = participantActivity;
-        if (_id == null) throw 1;
-
-        await this.updateScore(participantActivity._id, score);
+        await this.updateScore(_id, score);
     }
 
     public async deleteParticipantById(participantId: Participant["id"]) {
