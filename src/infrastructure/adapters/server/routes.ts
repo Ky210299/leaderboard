@@ -6,6 +6,7 @@ import {
     addScore,
     setScore,
     subtractScore,
+    getLeaderboard,
 } from "../../../application";
 import { UPDATE_SCORE_OPTIONS_TYPES } from "../../../domain/ports/repository";
 
@@ -25,6 +26,21 @@ router.get("/participants", async (req: Request, res: Response, next: NextFuncti
     try {
         const participants = await findAllParticipants.execute();
         res.json({ success: true, participants });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false });
+    }
+});
+
+router.get("/leaderboard/:activityId", async (req: Request, res: Response, next: NextFunction) => {
+    const { activityId } = req.params;
+    if (!activityId) {
+        res.status(400).json({ success: false, message: "Invalid data" });
+        return;
+    }
+    try {
+        const leaderboard = await getLeaderboard.execute(activityId);
+        res.json({ success: true, data: leaderboard });
     } catch (err) {
         console.log(err);
         res.status(500).json({ success: false });

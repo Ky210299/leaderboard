@@ -15,3 +15,4 @@ export { updateParticipant } from "./updateParticipant";
 export { addScore } from "./addScore";
 export { setScore } from "./setScore";
 export { subtractScore } from "./subtractScore";
+export { getLeaderboard } from "./getLeaderboard";

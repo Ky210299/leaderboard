@@ -21,7 +21,7 @@ const client = createClient({
 })();
 
 export default class RedisCache implements CachePort {
-    private readonly DEFAULT_EXPIRATION_TIME = 10 * 1000; // 10 hour
+    private readonly DEFAULT_EXPIRATION_TIME = 60 * 60 * 10; // 10 hour
     /**
      * Guarda un valor en el caché con una clave y opcionalmente un tiempo de expiración.
      * @param cacheKey - Clave del caché.

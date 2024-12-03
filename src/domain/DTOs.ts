@@ -16,11 +16,10 @@ export interface Score {
     value: number;
 }
 
-export type Leaderboard = [
-    {
-        rank: number;
-        participant: Participant;
-        activity: Activity;
-        score: Score["value"];
-    },
-];
+export type Leaderboard = Array<{
+    rank: number;
+    id: Participant["id"];
+    name: Participant["name"];
+    activity: Activity;
+    score: Score["value"];
+}>;

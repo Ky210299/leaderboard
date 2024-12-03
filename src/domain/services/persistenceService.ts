@@ -99,6 +99,10 @@ export default class PersistencyService {
     public async findAllParticipants() {
         return this.persistency.findAllParticipants();
     }
+    public findScoresByActivity(activityId: Activity["id"]) {
+        const scores = this.persistency.findScoresByActivityId(activityId);
+        return scores;
+    }
 
     public async deleteParticipant(participantId: Participant["id"]) {
         await this.persistency.deleteParticipantById(participantId);
