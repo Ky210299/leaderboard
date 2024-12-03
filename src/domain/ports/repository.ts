@@ -21,6 +21,8 @@ export default interface Repository {
 
     addParticipant: (participant: Participant) => Promise<void>;
 
+    findScoresByActivityId: (activityId: Activity["id"]) => Promise<Leaderboard>;
+
     findParticipantById: (participantId: Participant["id"]) => Promise<Participant | null>;
 
     findParticipantByName: (participantName: Participant["name"]) => Promise<Participant | null>;

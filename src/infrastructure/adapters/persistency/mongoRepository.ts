@@ -1,6 +1,6 @@
 import { Collection, MongoClient, ObjectId } from "mongodb";
 import { Repository } from "../../../domain";
-import { Activity, Participant, Score } from "../../../domain/DTOs";
+import { Activity, Leaderboard, Participant, Score } from "../../../domain/DTOs";
 
 const { MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DB } = process.env;
 
@@ -117,6 +117,43 @@ export default class MongoRepository implements Repository {
         }
 
         return participant;
+    }
+
+    public async findScoresByActivityId(activityId: Activity["id"]) {
+        const pipeline = [];
+
+        pipeline.push({
+            $match: {
+                "activity.id": activityId,
+            },
+        });
+        pipeline.push({
+            $setWindowFields: {
+                sortBy: { score: -1 },
+                output: {
+                    rank: {
+                        $rank: {},
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: false,
+            },
+        });
+
+        const scores = await this.leaderboardSchema
+            .aggregate<
+                {
+                    rank: number;
+                    id: Participant["id"];
+                    name: Participant["name"];
+                } & ActivityAndScore
+            >(pipeline)
+            .toArray();
+        return scores;
     }
 
     private async findActivityOfParticipant(
