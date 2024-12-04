@@ -18,8 +18,28 @@ class SetScore extends UseCases {
         activity: Activity,
         score: Score["value"],
     ) {
-        if (participantId == null || activity == null || score == null || typeof score !== "number")
+        const { id: activityId, initialScore, title } = activity;
+        if (
+            participantId == null ||
+            activity == null ||
+            !activityId ||
+            score == null ||
+            typeof score !== "number"
+        )
             throw new Error("Invalid score data");
+
+        const activityOfParticipant = await this.persistence?.findActivityOfParticipant(
+            participantId,
+            activityId,
+        );
+
+        if (activityOfParticipant == null && !!initialScore && !!title)
+            await this.cache?.delete("activities");
+        else
+            throw new Error(
+                "When a player's score is updated in a new activity, it is necessary to specify the initial score of said activity and its title",
+            );
+
         await this.persistence?.setScore(participantId, activity, score);
         return await this.persistence?.findParticipantById(participantId);
     }

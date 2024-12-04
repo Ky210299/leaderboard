@@ -156,16 +156,42 @@ export default class MongoRepository implements Repository {
         return scores;
     }
 
-    private async findActivityOfParticipant(
+    public async findActivities() {
+        const pipeline = [];
+        pipeline.push({
+            $match: {
+                activity: { $exists: true, $ne: null },
+            },
+        });
+        pipeline.push({
+            $group: {
+                _id: "$activity.id",
+                title: { $first: "$activity.title" },
+                initialScore: { $first: "$activity.initialScore" },
+            },
+        });
+        pipeline.push({
+            $project: {
+                _id: 0,
+                id: "$_id",
+                title: 1,
+                initialScore: 1,
+            },
+        });
+        const activities = await this.leaderboardSchema.aggregate<Activity>(pipeline).toArray();
+        return activities;
+    }
+
+    public async findActivityOfParticipant(
         participantId: Participant["id"],
         activityId: Activity["id"],
     ) {
         const activity = await this.leaderboardSchema.findOne<ActivityAndScore & { _id: ObjectId }>(
             { id: participantId, "activity.id": activityId },
-            { projection: { _id: 1, activity: 1, score: 1 } },
+            { projection: { _id: 1, id: 1, activity: 1, score: 1 } },
         );
         if (activity == null) return null;
-        return { ...activity };
+        return activity;
     }
 
     private async addActivityToParticipant(

@@ -18,7 +18,21 @@ class SubtractScore extends UseCases {
         activity: Activity,
         score: Score["value"],
     ) {
-        if (participantId == null || activity == null) throw new Error("Invalid score data");
+        const { id: activityId, initialScore, title } = activity;
+        if (participantId == null || activity == null || !activityId)
+            throw new Error("Invalid score data");
+
+        const activityOfParticipant = await this.persistence?.findActivityOfParticipant(
+            participantId,
+            activityId,
+        );
+        if (activityOfParticipant == null && !!initialScore && !!title)
+            await this.cache?.delete("activities");
+        else
+            throw new Error(
+                "When a player's score is updated in a new activity, it is necessary to specify the initial score of said activity and its title",
+            );
+
         await this.persistence?.subtractToScore(participantId, activity, score);
         return await this.persistence?.findParticipantById(participantId);
     }

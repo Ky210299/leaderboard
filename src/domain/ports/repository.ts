@@ -19,6 +19,11 @@ export default interface Repository {
 
     existParticipant: (participantId: Participant["id"]) => Promise<boolean>;
 
+    findActivityOfParticipant: (
+        participantId: Participant["id"],
+        activityId: Activity["id"],
+    ) => Promise<{ activity: Activity; score: Score["value"] } | null>;
+
     addParticipant: (participant: Participant) => Promise<void>;
 
     findScoresByActivityId: (activityId: Activity["id"]) => Promise<Leaderboard>;
@@ -26,6 +31,8 @@ export default interface Repository {
     findParticipantById: (participantId: Participant["id"]) => Promise<Participant | null>;
 
     findParticipantByName: (participantName: Participant["name"]) => Promise<Participant | null>;
+
+    findActivities: () => Promise<Activity[]>;
 
     sumToScore: (
         participantId: Participant["id"],

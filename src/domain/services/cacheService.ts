@@ -7,6 +7,15 @@ export default class CacheService {
         this.cache = cacheAdapter;
     }
 
+    public async getActivities() {
+        const value = await this.cache.get("activities");
+        return value;
+    }
+
+    public async saveActivities(activities: Activity[]) {
+        await this.cache.save("activities", activities);
+    }
+
     public async saveLeaderboardOfActivity(activityId: Activity["id"], leaderboard: Leaderboard) {
         const cacheKey = `leaderboard-${activityId}`;
         const exp = 10; // 10 sec;
