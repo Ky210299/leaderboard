@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
 
 const jSDocOptions = {
+    failOnErrors: true,
     definition: {
         openapi: "3.0.0",
         info: {
@@ -14,11 +15,10 @@ const jSDocOptions = {
             version: "1.0.0",
         },
     },
-    apis: ["./routesDoc"],
+    apis: ["./dist/infrastructure/adapters/server/routesDoc.js"],
 };
 
 const swaggerOptions = swaggerJSDoc(jSDocOptions);
-
 const app = express();
 
 // Middlewares

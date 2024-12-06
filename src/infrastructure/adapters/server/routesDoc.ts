@@ -1,6 +1,6 @@
 /**
- * @swagger
- * /participant:
+ * @openapi
+ * /v1/participant:
  *   post:
  *     summary: Create a new participant
  *     description: Allows creating a participant by providing a unique `id` and a `name`.
@@ -52,8 +52,8 @@
  */
 
 /**
- * @swagger
- * /participants:
+ * @openapi
+ * /v1/participants:
  *   get:
  *     summary: Retrieve all participants
  *     description: Fetch a list of all participants.
@@ -86,8 +86,8 @@
  */
 
 /**
- * @swagger
- * /leaderboard/{activityId}:
+ * @openapi
+ * /v1/leaderboard/{activityId}:
  *   get:
  *     summary: Retrieve the leaderboard for a specific activity
  *     description: Fetch the leaderboard associated with a specific activity by its ID.
@@ -133,8 +133,8 @@
  */
 
 /**
- * @swagger
- * /activities:
+ * @openapi
+ * /v1/activities:
  *   get:
  *     summary: Retrieve all activities
  *     description: Fetch a list of all activities.
@@ -159,8 +159,8 @@
  */
 
 /**
- * @swagger
- * /participant/{participantId}:
+ * @openapi
+ * /v1/participant/{participantId}:
  *   patch:
  *     summary: Update participant details
  *     description: Allows updating a participant's `id` and/or `name` using their unique identifier.
@@ -201,11 +201,13 @@
  */
 
 /**
- * @swagger
- * /participant/{participantId}/score:
+ * @openapi
+ * /v1/participant/{participantId}/score:
  *   patch:
  *     summary: Update participant's score for an activity
- *     description: Modify a participant's score using different methods: add, subtract. If the activity is new for the participant, they will be required to send the title and initial score.
+ *     description: |
+ *       Modify a participant's score using different methods: add, subtract and set.
+ *       If the activity is new for the participant, they will be required to send the title and initial score.
  *     tags:
  *       - Score
  *     parameters:
