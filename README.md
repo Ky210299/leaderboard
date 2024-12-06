@@ -1,7 +1,8 @@
 # ⚠️ Advice: This project is not finished yet.
 
 ## API Documentation
-http://localhost:{PORT}/doc
+http://localhost:3000/doc
+*3000 is the default PORT. Can be modified in the environment.
 
 ## 🏆 Leaderboard Service
 
