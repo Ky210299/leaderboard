@@ -2,9 +2,9 @@ import express, { json, Request, Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
-import { leaderboardRouter } from "./routes";
 import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
+import { leaderboardRouter } from "./leaderboard/infrastructure/adapters/server/routes";
 
 const jSDocOptions = {
     failOnErrors: true,

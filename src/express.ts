@@ -1,5 +1,5 @@
-import { ServerPort } from "../../../domain";
-import app from "./server";
+import ServerPort from "./serverPort";
+import app from "./serverAdapter";
 
 export default class ExpressServer implements ServerPort {
     private readonly server = app;

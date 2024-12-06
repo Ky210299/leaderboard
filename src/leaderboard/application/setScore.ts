@@ -10,7 +10,7 @@ class SetScore extends UseCases {
         } else if (UseCases.isValidCacheServiceInstance(cacheService) === false) {
             throw new Error('The "Create Participant Use Case" need a valid cache instance');
         }
-        super(persistenceService, cacheService, null);
+        super(persistenceService, cacheService);
     }
 
     public async execute(

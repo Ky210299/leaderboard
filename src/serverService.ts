@@ -1,4 +1,4 @@
-import ServerPort from "../ports/server";
+import ServerPort from "./serverPort";
 
 export default class ServerService {
     private readonly server: ServerPort;

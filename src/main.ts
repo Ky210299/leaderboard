@@ -1,4 +1,4 @@
-import ExpressServer from "./infrastructure/adapters/server/express";
+import ExpressServer from "./express";
 
 const server = new ExpressServer();
 const { PORT } = process.env;
