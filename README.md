@@ -1,4 +1,7 @@
-no# ⚠️ Advice: This project is not finished yet.
+# ⚠️ Advice: This project is not finished yet.
+
+## API Documentation
+http://localhost:{PORT}/doc
 
 ## 🏆 Leaderboard Service
 
@@ -50,5 +53,3 @@ npx tsc && docker compose up --build -d
 npx tsc && docker compose up --build --watch
 ```
 
-## API documentation
-localhost:{PORT}/doc
