@@ -26,12 +26,11 @@ class SubtractScore extends UseCases {
             participantId,
             activityId,
         );
-        if (activityOfParticipant == null && !!initialScore && !!title)
-            await this.cache?.delete("activities");
-        else
+        if (activityOfParticipant == null && (!initialScore || !title))
             throw new Error(
                 "When a player's score is updated in a new activity, it is necessary to specify the initial score of said activity and its title",
             );
+        else await this.cache?.delete("activities");
 
         await this.persistence?.subtractToScore(participantId, activity, score);
         return await this.persistence?.findParticipantById(participantId);
