@@ -1,0 +1,7 @@
+const LeaderboardErrors = {
+    INVALID_DATA: 0,
+    MISSING_RESOURCE: 1,
+    INVALID_PERSISTENCE: 2,
+    INVALID_CACHE: 3,
+    MISSING_ENVIRONMENTS_VARIABLES: 4,
+} as const
